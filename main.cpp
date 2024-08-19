@@ -14,10 +14,6 @@ private:
 		std::swap(arr, other.arr);
 	}
 
-	void check(size_t idx) const {
-		if(idx >= sz)
-			throw std::runtime_error("index is out of range");
-	}
 public:
 	String() {}
 
@@ -33,8 +29,15 @@ public:
 		std::copy(other.arr, other.arr + sz, arr);
 	}
 
-	String& operator=(String other) {
-		swap(other);
+	String& operator=(const String& other) & {
+		if(other.sz <= sz) {
+			std::copy(other.arr, other.arr + other.sz, arr);
+			sz = other.sz;
+			arr[sz] = '\0';
+			return *this;
+		}
+		String copy = other;
+		swap(copy);
 		return *this;
 	}
 
@@ -42,15 +45,11 @@ public:
 		delete[] arr;
 	}
 
-	friend std::ostream& operator<<(std::ostream&, const String& str);
-
 	const char& operator[](size_t idx) const {
-		check(idx);
 		return arr[idx];
 	}
 
 	char& operator[](size_t idx) {
-		check(idx);
 		return arr[idx];
 	}
 
@@ -100,6 +99,68 @@ public:
 		return arr[sz - 1];
 	}
 
+	String& operator+=(char c) {
+		push_back(c);
+		return *this;
+	}
+
+	String& operator+=(const String& other) {
+		if(sz + other.sz >= cap) {
+			cap = sz + other.sz + 1;
+			char* new_arr = new char[cap];
+			std::copy(arr, arr + sz, new_arr);
+			delete[] arr;
+			arr = new_arr;
+		}
+
+		std::copy(other.arr, other.arr + other.sz, arr + sz);
+		sz = sz + other.sz;
+		arr[sz] = '\0';
+
+		return *this;
+	}
+
+	void clear() {
+		sz = 0;
+		arr[sz] = '\0';
+	}
+
+	bool empty() const {
+		return ! sz;
+	}
+
+	String substr(size_t start, size_t count) const {
+		if(start + count > sz)
+			throw std::runtime_error("index is out of range");
+		
+		String substr(count);
+		std::copy(arr + start, arr + start + count, substr.arr);
+
+		return substr;
+	}
+
+	void shrink_to_fit() {
+		if(sz + 1 == cap)
+			return;
+		
+		cap = sz + 1;
+		char* new_arr = new char[cap];
+		std::copy(arr, arr + sz, new_arr);
+		delete[] arr;
+		arr = new_arr;
+		arr[sz] = '\0';
+	}
+
+	char* data() {
+		return arr;
+	}
+
+	const char* data() const {
+		return arr;
+	}
+
+	friend std::ostream& operator<<(std::ostream&, const String& str);
+	
 private:
 	size_t sz = 0;
 	size_t cap = 0;
@@ -111,6 +172,30 @@ std::ostream& operator<<(std::ostream& os, const String& str) {
 	return os;
 }
 
-int main() {
+String operator+(const String& str, char c) {
+	String copy(str);
+	copy += c;
+	return copy;
+}
 
+String operator+(const String& first, const String& second) {
+	String copy = first;
+	copy += second;
+	return copy;
+}
+
+String operator+(char c, const String& str) {
+	char* pc = new char(c);
+	String copy(pc);
+	delete pc;
+	copy += str;
+	return copy;
+}
+
+int main() {
+	const String s("123");
+	String s2("1234");
+	s2 = s;
+	s2.push_back('a');
+	std::cout << s2 << ' ' << s2.capacity();
 }
