@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include <compare>
 
 class String {
 private:
@@ -159,8 +160,26 @@ public:
 		return arr;
 	}
 
+	size_t find(const String& substr) const {
+		char* pos = strstr(arr, substr.arr);
+		return (pos ? pos - arr : sz);
+	}
+
 	friend std::ostream& operator<<(std::ostream&, const String& str);
 	
+	std::weak_ordering operator<=>(const String& other) const {
+		size_t max = std::max(sz, other.sz);
+		for(size_t i = 0; i < max; ++i) {
+			if(arr[i] == other.arr[i])
+				continue;
+			if(arr[i] < other.arr[i])
+				return std::weak_ordering::less;
+			return std::weak_ordering::greater;
+		}
+
+		return sz == other.sz ? std::weak_ordering::equivalent : (sz < other.sz ? std::weak_ordering::less : std::weak_ordering::greater);
+	}
+
 private:
 	size_t sz = 0;
 	size_t cap = 0;
@@ -192,10 +211,21 @@ String operator+(char c, const String& str) {
 	return copy;
 }
 
+bool operator==(const String& first, const String& second) {
+	if(first.size() != second.size())
+		return false;
+	
+	for(size_t i = 0; i < first.size(); ++i) {
+		if(first[i] != second[i])
+			return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const String& first, const String& second) {
+	return !(first == second);
+}
+
 int main() {
-	const String s("123");
-	String s2("1234");
-	s2 = s;
-	s2.push_back('a');
-	std::cout << s2 << ' ' << s2.capacity();
 }
