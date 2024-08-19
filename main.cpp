@@ -165,6 +165,16 @@ public:
 		return (pos ? pos - arr : sz);
 	}
 
+	size_t rfind(const String& substr) const {
+		size_t res = 0;
+		for(size_t start = 0; start < sz; start += substr.sz) {
+		char* pos = strstr(arr + start, substr.arr);
+		start = (pos ? pos - arr : sz);
+		res = start;
+		}
+		return res;
+	}
+
 	friend std::ostream& operator<<(std::ostream&, const String& str);
 	
 	std::weak_ordering operator<=>(const String& other) const {
