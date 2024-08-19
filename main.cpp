@@ -32,6 +32,8 @@ public:
 
 	String& operator=(const String& other) & {
 		if(other.sz <= sz) {
+			if(sz == 0)
+				return *this;
 			std::copy(other.arr, other.arr + other.sz, arr);
 			sz = other.sz;
 			arr[sz] = '\0';
@@ -72,6 +74,11 @@ public:
 	}
 
 	void push_back(char c) {
+		if(cap == 0) {
+			cap = 10;
+			arr = new char[cap];
+		}
+
 		if(sz == cap - 1) {
 			cap *= 2;
 			char* new_arr = new char[cap];
@@ -174,8 +181,6 @@ public:
 		}
 		return res;
 	}
-
-	friend std::ostream& operator<<(std::ostream&, const String& str);
 	
 	std::weak_ordering operator<=>(const String& other) const {
 		size_t max = std::max(sz, other.sz);
@@ -189,6 +194,9 @@ public:
 
 		return sz == other.sz ? std::weak_ordering::equivalent : (sz < other.sz ? std::weak_ordering::less : std::weak_ordering::greater);
 	}
+
+	friend std::ostream& operator<<(std::ostream&, const String& str);
+	friend std::istream& operator>>(std::istream&, String& str);
 
 private:
 	size_t sz = 0;
@@ -237,5 +245,15 @@ bool operator!=(const String& first, const String& second) {
 	return !(first == second);
 }
 
+std::istream& operator>>(std::istream& is, String& str) {
+    char instr[255];
+    is >> instr;
+	str = instr;
+	return is;
+}
+
 int main() {
+	String s;
+	std::cin >> s;
+	std::cout << s;
 }
